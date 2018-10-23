@@ -19,6 +19,8 @@ uniform mat4 InvPrjMatrix;
 uniform vec3 lightColor;
 uniform vec3 lightPos; 
 
+uniform float exposure = 1.0;
+
 /*
 struct Light {
     vec3 Position;
@@ -73,9 +75,10 @@ float ShadowCalculation(vec4 pos)
 */
 
 void main()
-{             
-    // retrieve data from G-buffer
+{        
+	const float gamma = 2.2;
     
+	// retrieve data from G-buffer
     vec4 temp = CalcEyeFromWindow(vec3(gl_FragCoord.x, gl_FragCoord.y, texture(gDepth, TexCoords).r));
     vec3 FragPos = vec3(temp / temp.w);
 
@@ -95,10 +98,10 @@ void main()
 
     else 
     {
-        vec3 result = vec3(0.0, 0.0, 0.0);
+		vec3 result = vec3(0.0, 0.0, 0.0);
         
         //ambient
-        result =+ 0.1 * lightColor * Albedo;
+        result = 0.1 * lightColor * Albedo;
 
         //diffuse
         vec3 lightDir = normalize(vec3( ViewMatrix * vec4(lightPos, 1.0)) - FragPos); 
@@ -112,7 +115,10 @@ void main()
         result += (diffuse + specular) * Albedo;
 
 
-        FragColor = vec4(result, 1.0);
+		// Exposure tone mapping
+		vec3 mapped = vec3(1.0) - exp(-result * exposure);
+
+        FragColor = vec4(mapped , 1.0);
     }
 
 }

@@ -9,6 +9,8 @@ uniform vec3 viewPos;
 uniform vec3 lightColor;
 uniform vec3 objectColor;
 
+uniform float exposure = 1.0;
+
 void main()
 {
     // ambient
@@ -29,5 +31,9 @@ void main()
     vec3 specular = specularStrength * spec * lightColor;  
         
     vec3 result = (ambient + diffuse + specular) * objectColor;
+	
+	// Exposure tone mapping
+	result = vec3(1.0) - exp(-result * exposure);
+
     FragColor = vec4(result, 1.0);
 } 
