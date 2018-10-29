@@ -14,6 +14,8 @@ namespace lumi {
 		Shader::Shader(const char * vertPath, const char * fragPath) : 
 			m_name("Default Shaders"), m_vertPath(vertPath), m_fragPath(fragPath)
 		{
+			GlCall(glGetIntegerv(GL_MAX_UNIFORM_BUFFER_BINDINGS, &m_maxUniformBlockBindings));
+
 			std::string vertexStringSource = read_file(m_vertPath);
 			std::string fragmentStringSource = read_file(m_fragPath);
 
@@ -92,6 +94,14 @@ namespace lumi {
 		void Shader::setUniformMat4(const GLchar * name, const maths::mat4 & matrix)
 		{
 			GlCall(glUniformMatrix4fv(getUniformLocation(name), 1, GL_FALSE, matrix.elements));
+		}
+
+		void Shader::setUniformBlockBinding(const GLchar * name, unsigned int binding_point)
+		{
+			if (binding_point >= m_maxUniformBlockBindings)
+				LUMI_FATAL("Bind overflow, maximum allowed: %d, binding: %d", m_maxUniformBlockBindings, binding_point);
+
+			GlCall(glUniformBlockBinding(m_shaderId, getUniformLocation(name, true), binding_point));
 		}
 
 		void Shader::enable() const
@@ -206,7 +216,7 @@ namespace lumi {
 			return program;
 		}
 
-		GLint Shader::getUniformLocation(const GLchar * name)
+		GLint Shader::getUniformLocation(const GLchar * name,bool isUniformBlock)
 		{
 			std::string key(name);
 
@@ -216,7 +226,11 @@ namespace lumi {
 
 				GLint result = 0;
 				
-				GlCall(result = glGetUniformLocation(m_shaderId, name));
+				if (isUniformBlock)
+					GlCall(result = glGetUniformBlockIndex(m_shaderId, name));
+
+				else 
+					GlCall(result = glGetUniformLocation(m_shaderId, name));
 
 				m_uniformMap.insert({ key, result});
 				return result;

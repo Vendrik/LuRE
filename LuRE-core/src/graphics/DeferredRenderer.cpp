@@ -9,7 +9,8 @@ namespace lumi {
 
 		DeferredRenderer::DeferredRenderer(unsigned int width, unsigned int height, std::shared_ptr<Shader> geometryShader, std::shared_ptr<Shader> lightningShader, std::shared_ptr<Shader> shadowShader)
 			: m_width(width), m_height(height), m_geometryShader(geometryShader), m_lightingShader(lightningShader), m_shadowShader(shadowShader),
-			m_projectionMatrix(1.0f), m_lookatMatrix(1.0f), m_cameraPosition(1.0f, 1.0f, 1.0f)
+			m_projectionMatrix(1.0f), m_lookatMatrix(1.0f), m_cameraPosition(1.0f, 1.0f, 1.0f),
+			m_lightsUbo(0)
 		{
 			float quadVertices[] =
 			{	// vertex attributes for a quad that fills the entire screen in Normalized Device Coordinates.
@@ -68,6 +69,7 @@ namespace lumi {
 			m_lightingShader->setUniform3f("lightColor", maths::vec3(1.0f, 1.0f, 1.0f));
 			m_lightingShader->setUniform3f("lightPos", maths::vec3(0.0f, 0.0f, 35.0f));
 
+			m_lightingShader->setUniformBlockBinding("Lights", m_lightsUbo.getBindingPoint());
 			m_lightingShader->disable();
 
 			init();
@@ -332,6 +334,25 @@ namespace lumi {
 				}
 
 			}
+
+		}
+		void DeferredRenderer::setLights(std::vector<Light>& lights)
+		{
+			unsigned int lights_count = 32;
+
+			// Hard coded 32 Lights cap, in accordance with shader
+			if (lights.size() < 32)
+				lights_count = lights.size();
+
+			m_lightingShader->enable();
+
+			void* ptr = m_lightsUbo.mapData(lights_count, sizeof(Light));
+			memcpy(ptr, lights.data(), lights_count * sizeof(Light));
+			m_lightsUbo.unmapData();
+
+			m_lightingShader->setUniform1i("lights_count", lights_count);
+
+			m_lightingShader->disable();
 
 		}
 		void DeferredRenderer::init()

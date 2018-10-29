@@ -4,8 +4,10 @@
 #include "buffers\Framebuffer.h"
 #include "buffers\Vertexarray.h"
 #include "buffers\Vertexbuffer.h"
+#include "buffers\UniformBuffer.h"
 #include "shaders\Shader.h"
 #include "..\maths\maths.h"
+#include "Light.h"
 
 #include <memory>
 
@@ -23,6 +25,7 @@ namespace lumi {
 			std::unique_ptr<FrameBuffer> m_shadowMapBuffer;
 
 			VertexBuffer m_targetVbo;
+			UniformBuffer m_lightsUbo;
 
 			maths::mat4 m_projectionMatrix;
 			maths::mat4 m_lookatMatrix;
@@ -51,6 +54,7 @@ namespace lumi {
 
 			inline void setCameraTarget(const maths::vec3& target) { m_cameraTarget = target; };
 			inline void setRenderShader(std::shared_ptr<Shader>& shader) { m_geometryShader.swap(shader); };
+			void setLights(std::vector<Light>& lights);
 
 		private:
 

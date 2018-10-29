@@ -12,6 +12,8 @@ namespace lumi {
 		{
 		private:
 			GLuint m_shaderId;
+			int m_maxUniformBlockBindings;
+
 			const char* m_name;
 			const char* m_vertPath;
 			const char* m_fragPath;
@@ -38,6 +40,8 @@ namespace lumi {
 			void setUniform4f(const GLchar* name, const maths::vec4& vector);
 			void setUniformMat4(const GLchar* name, const maths::mat4& matrix);
 
+			void setUniformBlockBinding(const GLchar* name, unsigned int binding_point);
+
 			void enable() const;
 			void disable() const;
 
@@ -49,7 +53,7 @@ namespace lumi {
 		private:
 
 			GLuint load(const char* vertSrc, const char* fragSrc);
-			GLint getUniformLocation(const GLchar* name);
+			GLint getUniformLocation(const GLchar* name, bool isUniformBlock = false);
 
 		};
 	}

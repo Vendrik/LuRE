@@ -4,22 +4,15 @@
 #include "buffers\Framebuffer.h"
 #include "buffers\Vertexarray.h"
 #include "buffers\Vertexbuffer.h"
+#include "buffers\UniformBuffer.h"
 #include "shaders\Shader.h"
 #include "..\maths\maths.h"
+#include "Light.h"
 
 #include <memory>
 
 namespace lumi {
 	namespace graphics {
-
-		struct Light
-		{
-			maths::vec3 m_position;
-			maths::vec3 m_color;
-
-			Light(maths::vec3& position, maths::vec3& color) : m_position(position), m_color(color) {};
-
-		};
 
 		class ForwardRenderer : public Renderer
 		{
@@ -30,6 +23,7 @@ namespace lumi {
 			std::unique_ptr<VertexArray> m_targetVao;
 
 			VertexBuffer m_targetVbo;
+			UniformBuffer m_lightsUbo;
 
 			maths::mat4 m_projectionMatrix;
 			maths::mat4 m_lookatMatrix;
@@ -56,9 +50,12 @@ namespace lumi {
 			void setPorjectionMatrix(const maths::mat4& projectionMatrix);
 			void setCameraPosition(const maths::vec3& cameraPosition);
 			void setCameraLookTarget(const maths::mat4& lookatMatrix);
-			void setRenderingTargetSize(unsigned int width, unsigned int height);			
+			void setRenderingTargetSize(unsigned int width, unsigned int height);		
+
+			void setLights(const std::vector<Light>& lights);
 			
 			inline void setRenderShader(std::shared_ptr<Shader>& shader) { m_renderShader.swap(shader); };
+			inline std::shared_ptr<Shader> getShader() { return m_antiAliasingLevel > 0 ? m_postPorcessingShader : m_renderShader; }
 
 		private:
 

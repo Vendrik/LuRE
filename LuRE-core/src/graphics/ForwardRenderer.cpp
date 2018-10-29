@@ -9,7 +9,8 @@ namespace lumi {
 	namespace graphics {
 
 		ForwardRenderer::ForwardRenderer(unsigned int width, unsigned int height, std::shared_ptr<Shader> renderShader)
-			: m_antiAliasingLevel(0), m_width(width), m_height(height), m_renderShader(renderShader), m_projectionMatrix(1.0f), m_lookatMatrix(1.0f), m_cameraPosition(1.0f, 1.0f, 1.0f)
+			: m_antiAliasingLevel(0), m_width(width), m_height(height), m_renderShader(renderShader), m_projectionMatrix(1.0f), m_lookatMatrix(1.0f), m_cameraPosition(1.0f, 1.0f, 1.0f),
+			m_lightsUbo(1)
 		{
 			float quadVertices[] = 
 			{	// vertex attributes for a quad that fills the entire screen in Normalized Device Coordinates.
@@ -45,13 +46,16 @@ namespace lumi {
 			m_renderShader->setUniform3f("lightColor", maths::vec3(1.0f, 1.0f, 1.0f));
 			m_renderShader->setUniform3f("objectColor", maths::vec3(0.4f, 0.5f, 1.9f));
 			m_renderShader->setUniformMat4("projection", m_projectionMatrix);
+
+			m_renderShader->setUniformBlockBinding("Lights", m_lightsUbo.getBindingPoint());
 			m_renderShader->disable();
 
 			init();
 		}
 
 		ForwardRenderer::ForwardRenderer(unsigned int width, unsigned int height, std::shared_ptr<Shader> renderShader, unsigned char antialiasingLevel)
-			: m_antiAliasingLevel(antialiasingLevel), m_width(width), m_height(height), m_renderShader(renderShader), m_projectionMatrix(1.0f), m_lookatMatrix(1.0f), m_cameraPosition(1.0f, 1.0f, 1.0f)
+			: m_antiAliasingLevel(antialiasingLevel), m_width(width), m_height(height), m_renderShader(renderShader), m_projectionMatrix(1.0f), m_lookatMatrix(1.0f), m_cameraPosition(1.0f, 1.0f, 1.0f),
+			m_lightsUbo(1)
 		{
 
 			float quadVertices[] = 
@@ -102,6 +106,8 @@ namespace lumi {
 			m_renderShader->setUniform3f("lightColor", maths::vec3(1.0f, 1.0f, 1.0f));
 			m_renderShader->setUniform3f("objectColor", maths::vec3(0.4f, 0.5f, 1.9f));
 			m_renderShader->setUniformMat4("projection", m_projectionMatrix);
+
+			m_renderShader->setUniformBlockBinding("Lights", m_lightsUbo.getBindingPoint());
 			m_renderShader->disable();
 
 			init();
@@ -233,6 +239,25 @@ namespace lumi {
 				}
 
 			}
+
+		}
+
+		void ForwardRenderer::setLights(const std::vector<Light> & lights)
+		{
+			unsigned int lights_count = 32;
+
+			// Hard coded 32 Lights cap, in accordance with shader
+			if (lights.size() < 32)
+				lights_count = lights.size();
+
+			m_renderShader->enable();
+
+			void* ptr = m_lightsUbo.mapData(lights_count, sizeof(Light));
+			memcpy(ptr, lights.data(), lights_count * sizeof(Light));
+			m_lightsUbo.unmapData();
+
+			m_renderShader->setUniform1i("lights_count", lights_count);
+			m_renderShader->disable();
 
 		}
 

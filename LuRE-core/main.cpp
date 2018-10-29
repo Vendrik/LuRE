@@ -35,6 +35,8 @@
 #include "src\graphics\ForwardRenderer.h"
 #include "src\graphics\DeferredRenderer.h"
 
+#include "src\graphics\Light.h"
+
 #include <chrono>
 
 //#define INSTANCED 
@@ -68,6 +70,12 @@ int main() {
 	}
 	*/
 
+	std::vector<Light> v;
+
+	v.emplace_back(maths::vec4(0.0f, 0.0f, 35.0f, 1.0f), maths::vec4(1.0f, 1.0f, 1.0f, 1.0f));
+	v.emplace_back(maths::vec4(0.0f, 0.0f, -35.0f, 1.0f), maths::vec4(1.0f, 0.0f, 0.0f, 1.0f));
+	v.emplace_back(maths::vec4(6.0f, 0.0f, 10.0f, 1.0f), maths::vec4(0.0f, 2.0f, 0.0f, 1.0f));
+
 #ifdef DEFERRED
 	std::shared_ptr<Shader> geometryShader = std::make_shared<Shader>("res/shader/geometry_pass_shader.vs", "res/shader/geometry_pass_shader.fs");
 	std::shared_ptr<Shader> lightningShader = std::make_shared<Shader>("res/shader/lightning_pass_shader.vs", "res/shader/lightning_pass_shader.fs");
@@ -75,18 +83,22 @@ int main() {
 
 	DeferredRenderer d_renderer(window.getWidth(), window.getHeight(), geometryShader, lightningShader, shadowShader);
 
-	d_renderer.setPorjectionMatrix(mat4::perspective(60.0f, ((float)window.getWidth() / (float)window.getHeight()), 1.0f, 200.0f));
+	d_renderer.setPorjectionMatrix(mat4::perspective(60.0f, ((float)window.getWidth() / (float)window.getHeight()), .1f, 200.0f));
 	//d_renderer.setPorjectionMatrix(mat4::reversedZPerspective(60.0f, ((float)window.getWidth() / (float)window.getHeight()), 1.0f));
 
 	d_renderer.updateViewportSettings();
+
+	d_renderer.setLights(v);
 
 #else
 	std::shared_ptr<Shader> renderShader = std::make_shared<Shader>("res/shader/basic_vertex_shader.vs", "res/shader/basic_fragment_shader.fs");
 
 	ForwardRenderer f_renderer(window.getWidth(), window.getHeight(), renderShader, 0);
 
-	f_renderer.setPorjectionMatrix(mat4::perspective(60.0f, ((float)window.getWidth() / (float)window.getHeight()), 1.0f, 200.0f));
+	f_renderer.setPorjectionMatrix(mat4::perspective(60.0f, ((float)window.getWidth() / (float)window.getHeight()), .1f, 200.0f));
 	//f_renderer.setPorjectionMatrix(mat4::reversedZPerspective(60.0f, ((float)window.getWidth() / (float)window.getHeight()), 1.0f));
+
+	f_renderer.setLights(v);
 #endif
 
 	std::vector<Model> entities;
@@ -159,7 +171,6 @@ int main() {
 	int width = window.getWidth();
 	int height = window.getHeight();
 
-
 	while (!window.closed())
 	{
 #ifdef DEFERRED 
@@ -172,7 +183,7 @@ int main() {
 			if (current_height != height || current_width != width)
 			{
 				d_renderer.setRenderingTargetSize(current_width, current_height);
-				d_renderer.setPorjectionMatrix(mat4::perspective(60.0f, ((float)current_width / (float)current_height), 1.0f, 200.0f));
+				d_renderer.setPorjectionMatrix(mat4::perspective(60.0f, ((float)current_width / (float)current_height), .1f, 200.0f));
 				//d_renderer.setPorjectionMatrix(mat4::reversedZPerspective(60.0f, ((float)current_width / (float)current_height), 1.0f));
 
 				width = current_width;
@@ -218,7 +229,7 @@ int main() {
 			if (current_height != height || current_width != width)
 			{
 				f_renderer.setRenderingTargetSize(current_width, current_height);
-				f_renderer.setPorjectionMatrix(mat4::perspective(60.0f, ((float)current_width / (float)current_height), 1.0f, 200.0f));
+				f_renderer.setPorjectionMatrix(mat4::perspective(60.0f, ((float)current_width / (float)current_height), .1f, 200.0f));
 				//f_renderer.setPorjectionMatrix(mat4::reversedZPerspective(60.0f, ((float)current_width / (float)current_height), 1.0f));
 
 				width = current_width;

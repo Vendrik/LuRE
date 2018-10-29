@@ -1,4 +1,6 @@
 #version 330 core
+#define MAX_LIGHTS 32
+
 out vec4 FragColor;
   
 in vec2 TexCoords;
@@ -20,15 +22,19 @@ uniform vec3 lightColor;
 uniform vec3 lightPos; 
 
 uniform float exposure = 1.0;
+uniform int lights_count = 0;
 
-/*
-struct Light {
-    vec3 Position;
-    vec3 Color;
+struct Light
+{
+	vec4 position;
+	vec4 color;
 };
-const int NR_LIGHTS = 32;
-uniform Light lights[NR_LIGHTS];
-*/
+
+// Uniform Buffer Object
+layout (std140) uniform Lights
+{
+	Light l[MAX_LIGHTS];
+};
 
 
 /* From: https://www.khronos.org/opengl/wiki/Compute_eye_space_from_window_space */
@@ -101,19 +107,21 @@ void main()
 		vec3 result = vec3(0.0, 0.0, 0.0);
         
         //ambient
-        result = 0.1 * lightColor * Albedo;
+        result = 0.1 * Albedo;
 
-        //diffuse
-        vec3 lightDir = normalize(vec3( ViewMatrix * vec4(lightPos, 1.0)) - FragPos); 
-        vec3 diffuse = max(dot(Normal, lightDir), 0.1) * lightColor;
+		for (int i = 0; i < lights_count; i++)
+		{
+			//diffuse
+			vec3 lightDir = normalize(vec3( ViewMatrix * l[i].position) - FragPos); 
+			vec3 diffuse = max(dot(Normal, lightDir), 0.1) * l[i].color.rgb;
 
-        //specular
-        vec3 viewDir = normalize(-FragPos);
-        vec3 reflectDir = reflect(-lightDir, Normal);  
-        vec3 specular = Specular * pow(max(dot(viewDir, reflectDir), 0.0), 64) * lightColor; 
+			//specular
+			vec3 viewDir = normalize(-FragPos);
+			vec3 reflectDir = reflect(-lightDir, Normal);  
+			vec3 specular = Specular * pow(max(dot(viewDir, reflectDir), 0.0), 64) * l[i].color.rgb; 
 
-        result += (diffuse + specular) * Albedo;
-
+			result += (diffuse + specular) * Albedo;
+		}
 
 		// Exposure tone mapping
 		vec3 mapped = vec3(1.0) - exp(-result * exposure);

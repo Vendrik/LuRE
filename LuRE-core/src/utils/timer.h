@@ -41,7 +41,7 @@ namespace lumi {
 			_frames++;
 			if (_currentTime - _lastTime >= 1.0 - _diff)
 			{
-				std::cout << "FPS: " << _frames << " ms: " << 1000.0/double(_frames) << " updates: " << _updates << "\r\n";
+				std::cout << "FPS: " << _frames << " ms: " << 1000.0f/float(_frames) << " updates: " << _updates << "\r\n";
 				_frames = 0;
 				_updates = 0;
 				_lastTime = _currentTime;
