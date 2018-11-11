@@ -139,6 +139,7 @@
   <ItemGroup>
     <ClInclude Include="src\graphics\buffers\Framebuffer.h" />
     <ClInclude Include="src\graphics\buffers\Indexbuffer.h" />
+    <ClInclude Include="src\graphics\buffers\ShaderStorageBuffer.h" />
     <ClInclude Include="src\graphics\buffers\UniformBuffer.h" />
     <ClInclude Include="src\graphics\buffers\Vertexarray.h" />
     <ClInclude Include="src\graphics\buffers\Vertexbuffer.h" />
@@ -171,6 +172,7 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="src\graphics\buffers\Framebuffer.cpp" />
     <ClCompile Include="src\graphics\buffers\Indexbuffer.cpp" />
+    <ClCompile Include="src\graphics\buffers\ShaderStorageBuffer.cpp" />
     <ClCompile Include="src\graphics\buffers\UniformBuffer.cpp" />
     <ClCompile Include="src\graphics\buffers\Vertexarray.cpp" />
     <ClCompile Include="src\graphics\buffers\Vertexbuffer.cpp" />

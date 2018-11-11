@@ -102,6 +102,9 @@
     <ClInclude Include="src\graphics\buffers\UniformBuffer.h">
       <Filter>File di intestazione</Filter>
     </ClInclude>
+    <ClInclude Include="src\graphics\buffers\ShaderStorageBuffer.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\utils\file_utils.cpp">
@@ -174,6 +177,9 @@
       <Filter>File di origine</Filter>
     </ClCompile>
     <ClCompile Include="src\graphics\buffers\UniformBuffer.cpp">
+      <Filter>File di origine</Filter>
+    </ClCompile>
+    <ClCompile Include="src\graphics\buffers\ShaderStorageBuffer.cpp">
       <Filter>File di origine</Filter>
     </ClCompile>
   </ItemGroup>
