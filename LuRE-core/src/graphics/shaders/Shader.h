@@ -8,10 +8,10 @@
 namespace lumi {
 	namespace graphics {
 
-		class Shader 
+		class Shader
 		{
 		private:
-			GLuint m_shaderId;
+			unsigned int m_shaderId;
 			int m_maxUniformBlockBindings;
 
 			const char* m_name;
@@ -20,9 +20,13 @@ namespace lumi {
 			const char* m_vertSrc;
 			const char* m_fragSrc;
 
-			std::unordered_map<std::string, GLint> m_uniformMap;
+			const char* m_computePath;
+			const char* m_computeSrc;
+
+			std::unordered_map<std::string, int> m_uniformMap;
 
 		public:
+			Shader(const char* computePath);
 			Shader(const char* vertPath, const char* fragPath);
 			Shader(const char* name, const char* vertSrc, const char* fragSrc);
 			~Shader();
@@ -52,8 +56,9 @@ namespace lumi {
 
 		private:
 
-			GLuint load(const char* vertSrc, const char* fragSrc);
-			GLint getUniformLocation(const GLchar* name, bool isUniformBlock = false);
+			unsigned int load(const char* vertSrc, const char* fragSrc);
+			unsigned int load_compute(const char* conputeSrc);
+			int getUniformLocation(const char* name, bool isUniformBlock = false);
 
 		};
 	}

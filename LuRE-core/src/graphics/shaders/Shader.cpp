@@ -10,8 +10,19 @@
 
 namespace lumi {
 	namespace graphics {
+		Shader::Shader(const char * computePath) :
+			m_name("Compute Shader"), m_computePath(computePath)
+		{
+			GlCall(glGetIntegerv(GL_MAX_UNIFORM_BUFFER_BINDINGS, &m_maxUniformBlockBindings));
 
-		Shader::Shader(const char * vertPath, const char * fragPath) : 
+			std::string computeStringSource = read_file(m_computePath);
+
+			m_computeSrc = computeStringSource.c_str();
+
+			m_shaderId = load_compute(m_computeSrc);
+		}
+
+		Shader::Shader(const char * vertPath, const char * fragPath) :
 			m_name("Default Shaders"), m_vertPath(vertPath), m_fragPath(fragPath)
 		{
 			GlCall(glGetIntegerv(GL_MAX_UNIFORM_BUFFER_BINDINGS, &m_maxUniformBlockBindings));
@@ -25,9 +36,11 @@ namespace lumi {
 			m_shaderId = load(m_vertSrc, m_fragSrc);
 		}
 
-		Shader::Shader(const char * name, const char * vertSrc, const char * fragSrc):
+		Shader::Shader(const char * name, const char * vertSrc, const char * fragSrc) :
 			m_name(name), m_vertSrc(vertSrc), m_fragSrc(fragSrc)
 		{
+			GlCall(glGetIntegerv(GL_MAX_UNIFORM_BUFFER_BINDINGS, &m_maxUniformBlockBindings));
+
 			m_shaderId = load(m_vertSrc, m_fragSrc);
 		}
 
@@ -131,9 +144,9 @@ namespace lumi {
 
 		GLuint Shader::load(const char* vertSrc, const char* fragSrc)
 		{
-			GLuint program = 0;  
-			GLuint vertex = 0;   
-			GLuint fragment = 0; 
+			GLuint program = 0;
+			GLuint vertex = 0;
+			GLuint fragment = 0;
 
 			GlCall(program = glCreateProgram());
 			GlCall(vertex = glCreateShader(GL_VERTEX_SHADER));
@@ -160,7 +173,7 @@ namespace lumi {
 
 			GlCall(glShaderSource(fragment, 1, &fragSrc, nullptr));
 			GlCall(glCompileShader(fragment));
-			
+
 			GlCall(glGetShaderiv(fragment, GL_COMPILE_STATUS, &res));
 
 			if (res == GL_FALSE)
@@ -179,7 +192,7 @@ namespace lumi {
 
 			GlCall(glAttachShader(program, vertex));
 			GlCall(glAttachShader(program, fragment));
-			
+
 			GlCall(glLinkProgram(program));
 
 			//GLint isLinked = GL_TRUE;
@@ -196,27 +209,84 @@ namespace lumi {
 
 				GlCall(glDetachShader(program, vertex));
 				GlCall(glDeleteShader(vertex));
-				
+
 				GlCall(glDetachShader(program, fragment));
 				GlCall(glDeleteShader(fragment));
-				
+
 				GlCall(glDeleteProgram(program));
 
 				return 0;
 			}
 
 			GlCall(glValidateProgram(program));
-			
+
 			GlCall(glDetachShader(program, vertex));
 			GlCall(glDeleteShader(vertex));
-			
+
 			GlCall(glDetachShader(program, fragment));
 			GlCall(glDeleteShader(fragment));
 
 			return program;
 		}
 
-		GLint Shader::getUniformLocation(const GLchar * name,bool isUniformBlock)
+		unsigned int Shader::load_compute(const char * conputeSrc)
+		{
+			unsigned int program = 0;
+			unsigned int compute = 0;
+
+			GlCall(program = glCreateProgram());
+			GlCall(compute = glCreateShader(GL_COMPUTE_SHADER));
+			GlCall(glShaderSource(compute, 1, &conputeSrc, nullptr));
+			GlCall(glCompileShader(compute));
+
+			GLint res;
+			GlCall(glGetShaderiv(compute, GL_COMPILE_STATUS, &res));
+
+			if (res == GL_FALSE)
+			{
+				GLint lenght;
+
+				GlCall(glGetShaderiv(compute, GL_INFO_LOG_LENGTH, &lenght));
+				std::vector<char> error(lenght);
+				GlCall(glGetShaderInfoLog(compute, lenght, &lenght, &error[0]));
+
+				std::cout << "Failed to compile compute shader!" << std::endl << &error[0] << std::endl;
+				GlCall(glDeleteShader(compute));
+
+				return 0;
+			}
+
+			GlCall(glAttachShader(program, compute));
+			GlCall(glLinkProgram(program));
+
+			GlCall(glGetProgramiv(program, GL_LINK_STATUS, &res));
+
+			if (res == GL_FALSE) {
+				GLint lenght;
+
+				GlCall(glGetProgramiv(program, GL_INFO_LOG_LENGTH, &lenght));
+				std::vector<char> error(lenght);
+				GlCall(glGetProgramInfoLog(program, lenght, &lenght, &error[0]));
+
+				std::cout << "Failed to Link shaders!" << std::endl << &error[0] << std::endl;
+
+				GlCall(glDetachShader(program, compute));
+				GlCall(glDeleteShader(compute));
+
+				GlCall(glDeleteProgram(program));
+
+				return 0;
+			}
+
+			GlCall(glValidateProgram(program));
+
+			GlCall(glDetachShader(program, compute));
+			GlCall(glDeleteShader(compute));
+
+			return program;
+		}
+
+		int Shader::getUniformLocation(const char* name, bool isUniformBlock)
 		{
 			std::string key(name);
 
@@ -225,14 +295,14 @@ namespace lumi {
 			if (elem == m_uniformMap.end()) {
 
 				GLint result = 0;
-				
+
 				if (isUniformBlock)
 					GlCall(result = glGetUniformBlockIndex(m_shaderId, name));
 
-				else 
+				else
 					GlCall(result = glGetUniformLocation(m_shaderId, name));
 
-				m_uniformMap.insert({ key, result});
+				m_uniformMap.insert({ key, result });
 				return result;
 			}
 			else
