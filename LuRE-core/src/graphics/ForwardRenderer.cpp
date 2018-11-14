@@ -8,8 +8,10 @@
 namespace lumi {
 	namespace graphics {
 
-		ForwardRenderer::ForwardRenderer(unsigned int width, unsigned int height, std::shared_ptr<Shader> renderShader)
-			: m_antiAliasingLevel(0), m_width(width), m_height(height), m_renderShader(renderShader), m_projectionMatrix(1.0f), m_lookatMatrix(1.0f), m_cameraPosition(1.0f, 1.0f, 1.0f),
+		ForwardRenderer::ForwardRenderer(unsigned int width, unsigned int height, std::shared_ptr<Shader> renderShader, std::shared_ptr<Shader> postProcessingShader)
+			: m_antiAliasingLevel(0), m_width(width), m_height(height), 
+			m_renderShader(renderShader), m_postProcessingShader(postProcessingShader),
+			m_projectionMatrix(1.0f), m_lookatMatrix(1.0f), m_cameraPosition(1.0f, 1.0f, 1.0f),
 			m_lightsUbo(1)
 		{
 			float quadVertices[] = 
@@ -39,8 +41,6 @@ namespace lumi {
 			m_targetVao->addBuffer(m_targetVbo, BufferType::Positions, 4 * sizeof(float), (void*)(nullptr));
 			m_targetVao->addBuffer(m_targetVbo, BufferType::Uvs, 4 * sizeof(float), (void*)(2 * sizeof(float)));
 
-			m_postPorcessingShader = std::shared_ptr<Shader>(ShaderFactory::PassthroughShader());
-
 			m_renderShader->enable();
 			m_renderShader->setUniform3f("lightPos", maths::vec3(0.0f, 0.0f, 35.0f));
 			m_renderShader->setUniform3f("lightColor", maths::vec3(1.0f, 1.0f, 1.0f));
@@ -53,8 +53,10 @@ namespace lumi {
 			init();
 		}
 
-		ForwardRenderer::ForwardRenderer(unsigned int width, unsigned int height, std::shared_ptr<Shader> renderShader, unsigned char antialiasingLevel)
-			: m_antiAliasingLevel(antialiasingLevel), m_width(width), m_height(height), m_renderShader(renderShader), m_projectionMatrix(1.0f), m_lookatMatrix(1.0f), m_cameraPosition(1.0f, 1.0f, 1.0f),
+		ForwardRenderer::ForwardRenderer(unsigned int width, unsigned int height, std::shared_ptr<Shader> renderShader, std::shared_ptr<Shader> postProcessingShader, unsigned char antialiasingLevel)
+			: m_antiAliasingLevel(antialiasingLevel), m_width(width), m_height(height), 
+			m_renderShader(renderShader), m_postProcessingShader(postProcessingShader),
+			m_projectionMatrix(1.0f), m_lookatMatrix(1.0f), m_cameraPosition(1.0f, 1.0f, 1.0f),
 			m_lightsUbo(1)
 		{
 
@@ -98,8 +100,6 @@ namespace lumi {
 				}
 
 			}
-
-			m_postPorcessingShader = std::shared_ptr<Shader>(ShaderFactory::PassthroughShader());
 
 			m_renderShader->enable();
 			m_renderShader->setUniform3f("lightPos", maths::vec3(0.0f, 0.0f, 35.0f));
@@ -166,7 +166,7 @@ namespace lumi {
 				m_targetFbo->unbind();
 
 
-			m_postPorcessingShader->enable();
+			m_postProcessingShader->enable();
 			m_targetVao->bind();
 
 			GlCall(glDisable(GL_DEPTH_TEST));

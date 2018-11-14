@@ -33,12 +33,12 @@ namespace lumi {
 			unsigned int m_height;
 			unsigned char m_antiAliasingLevel;
 
-			std::shared_ptr<Shader> m_postPorcessingShader;
+			std::shared_ptr<Shader> m_postProcessingShader;
 			std::shared_ptr<Shader> m_renderShader;
 
 		public:
-			ForwardRenderer(unsigned int width, unsigned int height, std::shared_ptr<Shader> renderShader);
-			ForwardRenderer(unsigned int width, unsigned int height, std::shared_ptr<Shader> renderShader, unsigned char antialiasingLevel);
+			ForwardRenderer(unsigned int width, unsigned int height, std::shared_ptr<Shader> renderShader, std::shared_ptr<Shader> postProcessingShader);
+			ForwardRenderer(unsigned int width, unsigned int height, std::shared_ptr<Shader> renderShader, std::shared_ptr<Shader> postProcessingShader, unsigned char antialiasingLevel);
 			virtual ~ForwardRenderer();
 
 			void render(std::vector<Model>& renderList) override;
@@ -55,7 +55,7 @@ namespace lumi {
 			void setLights(const std::vector<Light>& lights);
 			
 			inline void setRenderShader(std::shared_ptr<Shader>& shader) { m_renderShader.swap(shader); };
-			inline std::shared_ptr<Shader> getShader() { return m_antiAliasingLevel > 0 ? m_postPorcessingShader : m_renderShader; }
+			inline std::shared_ptr<Shader> getShader() { return m_antiAliasingLevel > 0 ? m_postProcessingShader : m_renderShader; }
 
 		private:
 

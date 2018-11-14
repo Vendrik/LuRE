@@ -146,13 +146,13 @@ namespace lumi {
 			Shader * DefaultShader()
 			{
 				//return Shader::FromSource(default_vertex_shader, defaut_fragment_shader);
-				return Shader::FromSource(basic_vertex_shader, basic_fragment_shader);
+				return nullptr;//Shader::FromSource(basic_vertex_shader, basic_fragment_shader);
 			}
 
 
 			Shader * PassthroughShader()
 			{
-				return Shader::FromSource(passthrough_vertex_shader, passthrough_fragment_shader);
+				return nullptr;//Shader::FromSource(passthrough_vertex_shader, passthrough_fragment_shader);
 			}
 
 		}
