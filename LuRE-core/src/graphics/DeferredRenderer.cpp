@@ -7,8 +7,13 @@
 namespace lumi {
 	namespace graphics {
 
-		DeferredRenderer::DeferredRenderer(unsigned int width, unsigned int height, std::shared_ptr<Shader> geometryShader, std::shared_ptr<Shader> lightningShader, std::shared_ptr<Shader> shadowShader)
-			: m_width(width), m_height(height), m_geometryShader(geometryShader), m_lightingShader(lightningShader), m_shadowShader(shadowShader),
+		DeferredRenderer::DeferredRenderer(unsigned int width,
+										   unsigned int height,
+										   std::shared_ptr<Shader> geometryShader,
+										   std::shared_ptr<Shader> lightningShader, 
+										   std::shared_ptr<Shader> shadowShader):
+			m_width(width), m_height(height),
+			m_geometryShader(geometryShader), m_lightingShader(lightningShader), m_shadowShader(shadowShader),
 			m_projectionMatrix(1.0f), m_lookatMatrix(1.0f), m_cameraPosition(1.0f, 1.0f, 1.0f),
 			m_lightsUbo(0)
 		{

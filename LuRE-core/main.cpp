@@ -77,9 +77,9 @@ int main() {
 	v.emplace_back(maths::vec4(6.0f, 0.0f, 10.0f, 1.0f), maths::vec4(0.0f, 2.0f, 0.0f, 1.0f));
 
 #ifdef DEFERRED
-	std::shared_ptr<Shader> geometryShader = std::make_shared<Shader>("res/shader/geometry_pass_shader.vs", "res/shader/geometry_pass_shader.fs");
-	std::shared_ptr<Shader> lightningShader = std::make_shared<Shader>("res/shader/lightning_pass_shader.vs", "res/shader/lightning_pass_shader.fs");
-	std::shared_ptr<Shader> shadowShader = std::make_shared<Shader>("res/shader/shadow_map_shader.vs", "res/shader/shadow_map_shader.fs");
+	std::shared_ptr<Shader> geometryShader = std::make_shared<Shader>("res/shader/GeometryPass.vert", "res/shader/GeometryPass.frag");
+	std::shared_ptr<Shader> lightningShader = std::make_shared<Shader>("res/shader/LightningPass.vert", "res/shader/LightningPass.frag");
+	std::shared_ptr<Shader> shadowShader = std::make_shared<Shader>("res/shader/DepthMap.vert", "res/shader/DepthMap.frag");
 
 	DeferredRenderer d_renderer(window.getWidth(), window.getHeight(), geometryShader, lightningShader, shadowShader);
 
@@ -91,9 +91,10 @@ int main() {
 	d_renderer.setLights(v);
 
 #else
-	std::shared_ptr<Shader> renderShader = std::make_shared<Shader>("res/shader/basic_vertex_shader.vs", "res/shader/basic_fragment_shader.fs");
+	std::shared_ptr<Shader> renderShader = std::make_shared<Shader>("res/shader/Basic.vert", "res/shader/Basic.frag");
+	std::shared_ptr<Shader> postprocessingShader = std::make_shared<Shader>("res/shader/FramebufferPassthrough.vert", "res/shader/FramebufferPassthrough.frag");
 
-	ForwardRenderer f_renderer(window.getWidth(), window.getHeight(), renderShader, 0);
+	ForwardRenderer f_renderer(window.getWidth(), window.getHeight(), renderShader, postprocessingShader, 0);
 
 	f_renderer.setPorjectionMatrix(mat4::perspective(60.0f, ((float)window.getWidth() / (float)window.getHeight()), .1f, 200.0f));
 	//f_renderer.setPorjectionMatrix(mat4::reversedZPerspective(60.0f, ((float)window.getWidth() / (float)window.getHeight()), 1.0f));
@@ -125,8 +126,8 @@ int main() {
 
 #else
 	// If enabled must change vertex shader model metrix from model to instanceOffset.
-	// Forward Renderer: basic_vertex_shader.vs
-	// Deferred Renderer: geometry_pass_shader
+	// Forward Renderer: Basic.vert
+	// Deferred Renderer: GeometryPass
 
 
 	std::vector<maths::mat4> instance;

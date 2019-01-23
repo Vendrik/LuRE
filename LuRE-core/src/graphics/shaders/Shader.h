@@ -3,62 +3,65 @@
 #include<GL\glew.h>
 #include "..\..\maths\maths.h"
 
+#include <string>
 #include <unordered_map>
 
 namespace lumi {
 	namespace graphics {
 
+		enum ShaderType
+		{
+			VertexShader = GL_VERTEX_SHADER,
+			TesselationControlShader = GL_TESS_CONTROL_SHADER,
+			TesselationEvaluationShader = GL_TESS_EVALUATION_SHADER,
+			GeometryShader = GL_GEOMETRY_SHADER,
+			FragmentShader = GL_FRAGMENT_SHADER,
+			ComputeShader = GL_COMPUTE_SHADER
+		};
+
 		class Shader
 		{
 		private:
-			unsigned int m_shaderId;
+			unsigned int m_programId;
 			int m_maxUniformBlockBindings;
-
-			const char* m_name;
-			const char* m_vertPath;
-			const char* m_fragPath;
-			const char* m_vertSrc;
-			const char* m_fragSrc;
-
-			const char* m_computePath;
-			const char* m_computeSrc;
+			bool m_separable;
 
 			std::unordered_map<std::string, int> m_uniformMap;
 
 		public:
-			Shader(const char* computePath);
-			Shader(const char* vertPath, const char* fragPath);
-			Shader(const char* name, const char* vertSrc, const char* fragSrc);
+
+			Shader(const std::string& ShaderPath, ShaderType Type);
+			Shader(const std::string& VertexPath, const std::string& FragmentPath, const std::string& GeometryPath = "", const std::string& TessControlPath = "", const std::string& TessEvaluationPath = "");
+
 			~Shader();
 
-			void setUniform1f(const GLchar* name, float value);
-			void setUniform1fv(const GLchar* name, float* value, int count);
-			void setUniform1i(const GLchar* name, int value);
-			void setUniform2i(const GLchar* name, int* value);
-			void setUniform3i(const GLchar* name, int* value);
-			void setUniform4i(const GLchar* name, int* value);
-			void setUniform1iv(const GLchar* name, int* value, int count);
-			void setUniform2f(const GLchar* name, const maths::vec2& vector);
-			void setUniform2f(const GLchar * name, float* vector);
-			void setUniform3f(const GLchar* name, const maths::vec3& vector);
-			void setUniform4f(const GLchar* name, const maths::vec4& vector);
-			void setUniformMat4(const GLchar* name, const maths::mat4& matrix);
+			void setUniform1f(const std::string& Name, float Value);
+			void setUniform1fv(const std::string& Name, float* Value, int Count);
+			void setUniform1i(const std::string& Name, int Value);
+			void setUniform2i(const std::string& Name, int* Value);
+			void setUniform3i(const std::string& Name, int* Value);
+			void setUniform4i(const std::string& Name, int* Value);
+			void setUniform1iv(const std::string& Name, int* Value, int Count);
+			void setUniform2f(const std::string& Name, const maths::vec2& Vector);
+			void setUniform2f(const std::string& Name, float* Vector);
+			void setUniform3f(const std::string& Name, const maths::vec3& Vector);
+			void setUniform4f(const std::string& Name, const maths::vec4& Vector);
+			void setUniformMat4(const std::string& Name, const maths::mat4& Matrix);
 
-			void setUniformBlockBinding(const GLchar* name, unsigned int binding_point);
+			void setUniformBlockBinding(const std::string& Name, unsigned int BindingPoint);
 
 			void enable() const;
 			void disable() const;
 
-			static Shader* FromFile(const char* vertPath, const char* fragPath);
-			static Shader* FromSource(const char* vertSrc, const char* fragSrc);
-			static Shader* FromSource(const char* name, const char* vertSrc, const char* fragSrc);
-
+			static Shader* FromFile(const std::string& VertexPath, const std::string& FragmentPath);
 
 		private:
 
-			unsigned int load(const char* vertSrc, const char* fragSrc);
-			unsigned int load_compute(const char* conputeSrc);
-			int getUniformLocation(const char* name, bool isUniformBlock = false);
+			static unsigned int compileShader(const std::string& ShaderSource, ShaderType Type);
+			static unsigned int linkShader(unsigned int ShaderId, bool Separable);
+			static unsigned int linkShader(unsigned int VertexId, unsigned int FragmentId, unsigned int GeometryId = 0, unsigned int TessControlId = 0, unsigned int TessEvaluationId = 0);
+
+			int getUniformLocation(const std::string& Name, bool IsUniformBlock = false);
 
 		};
 	}
